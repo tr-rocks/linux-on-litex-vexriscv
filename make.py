@@ -40,6 +40,19 @@ class Board:
 # Xilinx Boards
 #---------------------------------------------------------------------------------------------------
 
+# Antmicro DatacenterDDR4 -----------------------------------------------------------------------------------
+
+class DatacenterDDR4(Board):
+    def __init__(self):
+        from litex_boards.targets import antmicro_datacenter_ddr4_test_board
+        Board.__init__(self, antmicro_datacenter_ddr4_test_board.BaseSoC, soc_capabilities={
+            # Communication
+            "serial",
+            "ethernet",
+            # Storage
+            "sdcard",
+        })
+
 # Acorn support ------------------------------------------------------------------------------------
 
 class Acorn(Board):
@@ -722,6 +735,10 @@ class TitaniumTi60F225DevKit(Board):
 #---------------------------------------------------------------------------------------------------
 
 supported_boards = {
+    
+    # Antmicro
+    "datacenter"                  : DatacenterDDR4,
+    
     # Xilinx
     "acorn"                       : Acorn,
     "acorn_pcie"                  : AcornPCIe,
