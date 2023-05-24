@@ -43,8 +43,8 @@ class Board:
 # Antmicro DatacenterDDR4 -----------------------------------------------------------------------------------
 
 class DatacenterDDR4(Board):
+    soc_kwargs = {"l2_size" : 8192} # Use Wishbone and L2 for memory accesses.
     def __init__(self):
-        soc_kwargs = {"l2_size" : 8192} # Use Wishbone and L2 for memory accesses.
         from litex_boards.targets import antmicro_datacenter_ddr4_test_board
         Board.__init__(self, antmicro_datacenter_ddr4_test_board.BaseSoC, soc_capabilities={
             # Communication
