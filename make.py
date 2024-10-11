@@ -3,43 +3,25 @@
 #
 # This file is part of Linux-on-LiteX-VexRiscv
 #
-# Copyright (c) 2019-2022, Linux-on-LiteX-VexRiscv Developers
+# Copyright (c) 2019-2024, Linux-on-LiteX-VexRiscv Developers
 # SPDX-License-Identifier: BSD-2-Clause
 
 import os
+import re
 import sys
 import argparse
 
 from litex.soc.integration.builder import Builder
 from litex.soc.cores.cpu.vexriscv_smp import VexRiscvSMP
 
+from boards import *
 from soc_linux import SoCLinux
 
-# Board Definition ---------------------------------------------------------------------------------
-
-class Board:
-    soc_kwargs = {
-        "integrated_rom_size"  : 0x10000,
-        "integrated_sram_size" : 0x1800,
-        "l2_size"              : 0
-    }
-    def __init__(self, soc_cls=None, soc_capabilities={}, soc_constants={}):
-        self.soc_cls          = soc_cls
-        self.soc_capabilities = soc_capabilities
-        self.soc_constants    = soc_constants
-
-    def load(self, filename):
-        prog = self.platform.create_programmer()
-        prog.load_bitstream(filename)
-
-    def flash(self, filename):
-        prog = self.platform.create_programmer()
-        prog.flash(0, filename)
-
 #---------------------------------------------------------------------------------------------------
-# Xilinx Boards
+# Helpers
 #---------------------------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 # Antmicro DatacenterDDR4 -----------------------------------------------------------------------------------
 
 class DatacenterDDR4(Board):
@@ -397,344 +379,27 @@ class DecklinkQuadHDMIRecorder(Board):
             # Storage
             "pcie",
         })
+=======
+def camel_to_snake(name):
+    name = re.sub(r'(?<=[a-z])(?=[A-Z])', '_', name)
+    return name.lower()
+>>>>>>> 69545456c5ccfbc88973107d64c1b7097c9f4c9b
 
-#---------------------------------------------------------------------------------------------------
-# Lattice Boards
-#---------------------------------------------------------------------------------------------------
+def get_supported_boards():
+    board_classes = {}
+    for name, obj in globals().items():
+        name = camel_to_snake(name)
+        if isinstance(obj, type) and issubclass(obj, Board) and obj is not Board:
+            board_classes[name] = obj
+    return board_classes
 
-# Versa ECP5 support -------------------------------------------------------------------------------
-
-class VersaECP5(Board):
-    def __init__(self):
-        from litex_boards.targets import lattice_versa_ecp5
-        Board.__init__(self, lattice_versa_ecp5.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            "ethernet",
-        })
-
-# ULX3S support ------------------------------------------------------------------------------------
-
-class ULX3S(Board):
-    soc_kwargs = {"l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
-    def __init__(self):
-        from litex_boards.targets import radiona_ulx3s
-        Board.__init__(self, radiona_ulx3s.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # Storage
-            "sdcard",
-            # Video,
-            "framebuffer",
-        })
-
-# ULX4M-LD-V2 support ------------------------------------------------------------------------------------
-class ULX4M_LD_V2(Board):
-    soc_kwargs = {"uart_name": "serial", "sys_clk_freq": int(50e6), "l2_size" : 2048} #2048 } #32768} # Use Wishbone and L2 for memory accesse$
-    def __init__(self):
-        from litex_boards.targets import radiona_ulx4m_ld_v2
-        Board.__init__(self, radiona_ulx4m_ld_v2.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # Storage
-            "sdcard",
-            # Video,
-            "framebuffer",
-            "video_terminal",
-        })
-        
-# HADBadge support ---------------------------------------------------------------------------------
-
-class HADBadge(Board):
-    soc_kwargs = {"l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
-    def __init__(self):
-        from litex_boards.targets import hackaday_hadbadge
-        Board.__init__(self, hackaday_hadbadge.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-        })
-
-    def load(self, filename):
-        os.system("dfu-util --alt 2 --download {} --reset".format(filename))
-
-# OrangeCrab support -------------------------------------------------------------------------------
-
-class OrangeCrab(Board):
-    soc_kwargs = {"sys_clk_freq" : int(64e6) } # Increase sys_clk_freq to 64MHz (48MHz default).
-    def __init__(self):
-        from litex_boards.targets import gsd_orangecrab
-        Board.__init__(self, gsd_orangecrab.BaseSoC, soc_capabilities={
-            # Communication
-            "usb_acm",
-            # Buses
-            "i2c",
-            # Storage
-            "sdcard",
-        })
-
-# Butterstick support ------------------------------------------------------------------------------
-
-class ButterStick(Board):
-    soc_kwargs = {"uart_name": "jtag_uart"}
-    def __init__(self):
-        from litex_boards.targets import gsd_butterstick
-        Board.__init__(self, gsd_butterstick.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            "ethernet",
-        })
-
-# Cam Link 4K support ------------------------------------------------------------------------------
-
-class CamLink4K(Board):
-    def __init__(self):
-        from litex_boards.targets import camlink_4k
-        Board.__init__(self, camlink_4k.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-        })
-
-    def load(self, filename):
-        os.system("camlink configure {}".format(filename))
-
-# TrellisBoard support -----------------------------------------------------------------------------
-
-class TrellisBoard(Board):
-    def __init__(self):
-        from litex_boards.targets import trellisboard
-        Board.__init__(self, trellisboard.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # Storage
-            "sdcard",
-        })
-
-# ECPIX5 support -----------------------------------------------------------------------------------
-
-class ECPIX5(Board):
-    def __init__(self):
-        from litex_boards.targets import lambdaconcept_ecpix5
-        Board.__init__(self, lambdaconcept_ecpix5.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            "ethernet",
-            # Storage
-            "sdcard",
-        })
-
-# Colorlight i5 support ----------------------------------------------------------------------------
-
-class Colorlight_i5(Board):
-    soc_kwargs = {"l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
-    def __init__(self):
-        from litex_boards.targets import colorlight_i5
-        Board.__init__(self, colorlight_i5.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            "ethernet",
-        })
-
-# Icesugar Pro support -----------------------------------------------------------------------------
-
-class IcesugarPro(Board):
-    soc_kwargs = {"l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
-    def __init__(self):
-        from litex_boards.targets import muselab_icesugar_pro
-        Board.__init__(self, muselab_icesugar_pro.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # Storage
-            "spiflash",
-            "sdcard",
-        })
-
-# Schoko support -----------------------------------------------------------------------------------
-class Schoko(Board):
-    soc_kwargs = {"l2_size" : 8192}
-    def __init__(self):
-        from litex_boards.targets import machdyne_schoko
-        Board.__init__(self, machdyne_schoko.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            "usb_host",
-            # Storage
-            "spiflash",
-            #"sdcard",
-            "spisdcard",
-            # Video,
-            "framebuffer",
-        })
-
-# Konfekt support -----------------------------------------------------------------------------------
-class Konfekt(Board):
-    soc_kwargs = {"l2_size" : 0}
-    def __init__(self):
-        from litex_boards.targets import machdyne_konfekt
-        Board.__init__(self, machdyne_konfekt.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            "usb_host",
-            # Storage
-            #"spiflash",
-            "spisdcard",
-            #"sdcard",
-            # Video,
-            "framebuffer",
-        })
-
-# Noir support -----------------------------------------------------------------------------------
-class Noir(Board):
-    soc_kwargs = {"l2_size" : 8192}
-    def __init__(self):
-        from litex_boards.targets import machdyne_noir
-        Board.__init__(self, machdyne_noir.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            "usb_host",
-            # Storage
-            "spiflash",
-            "spisdcard",
-            #"sdcard",
-            # Video,
-            "framebuffer",
-        })
-
-#---------------------------------------------------------------------------------------------------
-# Intel Boards
-#---------------------------------------------------------------------------------------------------
-
-# De10Nano support ---------------------------------------------------------------------------------
-
-class De10Nano(Board):
-    soc_kwargs = {
-        "with_mister_sdram" : True, # Add MiSTer SDRAM extension.
-        "l2_size"           : 2048, # Use Wishbone and L2 for memory accesses.
-        "integrated_sram_size": 0x1000, # Power of 2 so Quartus infers it properly.
-    }
-    def __init__(self):
-        from litex_boards.targets import terasic_de10nano
-        Board.__init__(self, terasic_de10nano.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # Storage
-            "sdcard",
-            # GPIOs
-            "leds",
-            "switches",
-        })
-
-# De0Nano support ----------------------------------------------------------------------------------
-
-class De0Nano(Board):
-    soc_kwargs = {
-        "l2_size" : 2048, # Use Wishbone and L2 for memory accesses.
-        "integrated_sram_size": 0x1000, # Power of 2 so Quartus infers it properly.
-    }
-    def __init__(self):
-        from litex_boards.targets import terasic_de0nano
-        Board.__init__(self, terasic_de0nano.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-        })
-
-# De1-SoC support ----------------------------------------------------------------------------------
-
-class De1SoC(Board):
-    soc_kwargs = {
-        "l2_size" : 2048, # Use Wishbone and L2 for memory accesses.
-        "integrated_sram_size": 0x1000, # Power of 2 so Quartus infers it properly.
-    }
-    def __init__(self):
-        from litex_boards.targets import terasic_de1soc
-        Board.__init__(self, terasic_de1soc.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # GPIOs
-            "leds",
-            "switches",
-        })
-
-# QMTECH EP4CE15 support ---------------------------------------------------------------------------
-
-class Qmtech_EP4CE15(Board):
-    soc_kwargs = {
-        "variant" : "ep4ce15",
-        "l2_size" : 2048, # Use Wishbone and L2 for memory accesses.
-        "integrated_sram_size": 0x1000, # Power of 2 so Quartus infers it properly.
-    }
-    def __init__(self):
-        from litex_boards.targets import qmtech_ep4cex5
-        Board.__init__(self, qmtech_ep4cex5.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-        })
-
-# ... and its bigger brother 
-
-class Qmtech_EP4CE55(Board):
-    soc_kwargs = {
-        "variant" : "ep4ce55",
-        "l2_size" :  2048, # Use Wishbone and L2 for memory accesses.
-        "integrated_sram_size": 0x1000, # Power of 2 so Quartus infers it properly.
-    }
-    def __init__(self):
-        from litex_boards.targets import qmtech_ep4cex5
-        Board.__init__(self, qmtech_ep4cex5.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-        })
-
-
-# QMTECH 5CEFA2 support
-# It is possible to build the SoC --cpu-count=2 for this chip
-class Qmtech_5CEFA2(Board):
-    soc_kwargs = {
-        "variant" : "5cefa2",
-        "l2_size" :  2048, # Use Wishbone and L2 for memory accesses.
-        "integrated_sram_size": 0x1000, # Power of 2 so Quartus infers it properly.
-    }
-    def __init__(self):
-        from litex_boards.targets import qmtech_5cefa2
-        Board.__init__(self, qmtech_5cefa2.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-        })
-
-#---------------------------------------------------------------------------------------------------
-# Efinix Boards
-#---------------------------------------------------------------------------------------------------
-
-class TrionT120BGA576DevKit(Board):
-    soc_kwargs = {"l2_size" : 2048} # Use Wishbone and L2 for memory accesses.
-    def __init__(self):
-        from litex_boards.targets import efinix_trion_t120_bga576_dev_kit
-        Board.__init__(self, efinix_trion_t120_bga576_dev_kit.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # GPIOs
-             "leds",
-        })
-
-class TitaniumTi60F225DevKit(Board):
-    soc_kwargs = {
-        "with_hyperram" : True,
-        "sys_clk_freq"  : 300e6,
-    }
-    def __init__(self):
-        from litex_boards.targets import efinix_titanium_ti60_f225_dev_kit
-        Board.__init__(self, efinix_titanium_ti60_f225_dev_kit.BaseSoC, soc_capabilities={
-            # Communication
-            "serial",
-            # Storage
-            "sdcard",
-            # GPIOs
-            "leds",
-        })
+supported_boards = get_supported_boards()
 
 #---------------------------------------------------------------------------------------------------
 # Build
 #---------------------------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 supported_boards = {
     
     # Antmicro
@@ -795,6 +460,8 @@ supported_boards = {
     "titanium_ti60_f225_dev_kit"  : TitaniumTi60F225DevKit,
     }
 
+=======
+>>>>>>> 69545456c5ccfbc88973107d64c1b7097c9f4c9b
 def main():
     description = "Linux on LiteX-VexRiscv\n\n"
     description += "Available boards:\n"
@@ -822,8 +489,6 @@ def main():
     if args.board == "all":
         board_names = list(supported_boards.keys())
     else:
-        args.board = args.board.lower()
-        args.board = args.board.replace(" ", "_")
         board_names = [args.board]
 
     # Board(s) iteration ---------------------------------------------------------------------------
@@ -898,18 +563,16 @@ def main():
             from litex_boards.platforms.avnet_aesku40 import _sdcard_pmod_io
             board.platform.add_extension(_sdcard_pmod_io)
 
-        if board_name in ["orangecrab"]:
+        if board_name in ["orange_crab"]:
             from litex_boards.platforms.gsd_orangecrab import feather_i2c
             board.platform.add_extension(feather_i2c)
 
-        if "mmcm" in board.soc_capabilities:
-            soc.add_mmcm(2)
         if "spisdcard" in board.soc_capabilities:
             soc.add_spi_sdcard()
         if "sdcard" in board.soc_capabilities:
             soc.add_sdcard()
         if "ethernet" in board.soc_capabilities:
-            soc.configure_ethernet(local_ip=args.local_ip, remote_ip=args.remote_ip)
+            soc.configure_ethernet(remote_ip=args.remote_ip)
         #if "leds" in board.soc_capabilities:
         #    soc.add_leds()
         if "rgb_led" in board.soc_capabilities:
@@ -920,10 +583,6 @@ def main():
             soc.add_spi(args.spi_data_width, args.spi_clk_freq)
         if "i2c" in board.soc_capabilities:
             soc.add_i2c()
-        if "xadc" in board.soc_capabilities:
-            soc.add_xadc()
-        if "icap_bitstream" in board.soc_capabilities:
-            soc.add_icap_bitstream()
 
         # Build ------------------------------------------------------------------------------------
         build_dir = os.path.join("build", board_name)

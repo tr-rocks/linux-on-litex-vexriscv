@@ -9,7 +9,7 @@
                     / /__/ / __/ -_)>  </___/ |/ / -_) \ // __/ (_-</ __/ |/ /
                    /____/_/\__/\__/_/|_|    |___/\__/_\_\/_/ /_/___/\__/|___/
 
-                   Copyright (c) 2019-2022, Linux-on-LiteX-VexRiscv Developers
+                   Copyright (c) 2019-2024, Linux-on-LiteX-VexRiscv Developers
 ```
 [![](https://github.com/litex-hub/linux-on-litex-vexriscv/workflows/ci/badge.svg)](https://github.com/litex-hub/linux-on-litex-vexriscv/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
 > **Note:** Tested on Ubuntu 18.04/20.04 LTS.
@@ -47,46 +47,55 @@ The current list of boards that have been tested and are supported can be obtain
 
     ├── acorn
     ├── acorn_pcie
+    ├── aesku40
     ├── alveo_u250
     ├── alveo_u280
     ├── arty
     ├── arty_a7
     ├── arty_s7
-    ├── butterstick
-    ├── camlink_4k
+    ├── butter_stick
+    ├── cam_link4k
     ├── colorlight_i5
     ├── de0nano
     ├── de10nano
-    ├── de1soc
+    ├── de1so_c
+    ├── decklink_quad_hdmirecorder
     ├── ecpix5
     ├── genesys2
     ├── hadbadge
+    ├── hseda_xc7a35t
     ├── icesugar_pro
     ├── kc705
     ├── kcu105
-    ├── machdyne_konfekt
-    ├── machdyne_noir
-    ├── machdyne_schoko
-    ├── minispartan6
+    ├── konfekt
+    ├── mini_spartan6
     ├── mnt_rkx7
-    ├── netv2
+    ├── ne_tv2
     ├── nexys4ddr
     ├── nexys_video
-    ├── orangecrab
+    ├── noir
+    ├── orange_crab
     ├── pipistrello
+    ├── qmtech_5cefa2
     ├── qmtech_ep4ce15
     ├── qmtech_ep4ce55
-    ├── qmtech_wukong
+    ├── qmtech_wu_kong
+    ├── schoko
     ├── sds1104xe
+    ├── sipeed_tang_nano_20k
+    ├── sipeed_tang_primer_20k
     ├── stlv7325
-    ├── titanium_ti60_f225_dev_kit
-    ├── trellisboard
-    ├── trion_t120_bga576_dev_kit
+    ├── stlv7325_v2
+    ├── titanium_ti60f225dev_kit
+    ├── trellis_board
+    ├── trion_t120bga576dev_kit
     ├── ulx3s
+    ├── ulx4m_ld_v2
     ├── vc707
     ├── versa_ecp5
     ├── xcu1525
     ├── zcu104
+
 
 Adding support for another board from LiteX-Boards satisfying the requirements should only be a matter of adding a few lines to `make.py`.
 
@@ -123,6 +132,14 @@ $ wget https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.1.0-201
 $ tar -xvf riscv64-unknown-elf-gcc-8.1.0-2019.01.0-x86_64-linux-ubuntu14.tar.gz
 $ export PATH=$PATH:$PWD/riscv64-unknown-elf-gcc-8.1.0-2019.01.0-x86_64-linux-ubuntu14/bin/
 ```
+
+[> Installing SBT (Only required for custom CPU configs)
+--------------------------------
+Some regular VexRiscv-smp configuration are already pregenerated, 
+but for others, it need to run som SpinalHDL hardware generation, which require sbt.
+
+Please visit: https://www.scala-sbt.org/1.x/docs/Installing-sbt-on-Linux.html#Installing+sbt+on+Linux
+
 [> Installing Verilator (only needed for simulation)
 ----------------------------------------------------
 ```sh
@@ -316,7 +333,7 @@ $ cd buildroot
 $ make BR2_EXTERNAL=../linux-on-litex-vexriscv/buildroot/ litex_vexriscv_defconfig
 $ make
 ```
-The binaries are located in *output/images/*.
+The binaries are located in *output/images/* and *images/*.
 
 [> Generating the Linux binaries with USB host support (optional)
 -----------------------------------------------------------------
@@ -326,12 +343,12 @@ $ cd buildroot
 $ make BR2_EXTERNAL=../linux-on-litex-vexriscv/buildroot/ litex_vexriscv_usbhost_defconfig
 $ make
 ```
-The binaries are located in *output/images/*.
+The binaries are located in *output/images/* and *images/*.
 
-[> Generating the OpenSBI binary (optional)
+[> Generating the OpenSBI binary (optional / part of the buildroot build sequence)
 -------------------------------------------
 ```sh
-$ git clone https://github.com/litex-hub/opensbi --branch 0.8-linux-on-litex-vexriscv
+$ git clone https://github.com/litex-hub/opensbi --branch 1.3.1-linux-on-litex-vexriscv
 $ cd opensbi
 $ make CROSS_COMPILE=riscv-none-embed- PLATFORM=litex/vexriscv
 ```

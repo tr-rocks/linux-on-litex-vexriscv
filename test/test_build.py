@@ -1,7 +1,7 @@
 #
 # This file is part of Linux-on-LiteX-VexRiscv
 #
-# Copyright (c) 2019-2021, Linux-on-LiteX-VexRiscv Developers
+# Copyright (c) 2019-2024, Linux-on-LiteX-VexRiscv Developers
 # SPDX-License-Identifier: BSD-2-Clause
 
 import os
@@ -28,8 +28,9 @@ class TestBuild(unittest.TestCase):
 
     def test_boards(self):
         excluded_boards = [
-            "trion_t120_bga576_dev_kit",  # Reason: Require Efinity toolchain.
-            "titanium_ti60_f225_dev_kit", # Reason: Require Efinity toolchain.
+            "schoko",                   # USB OHCI netlist generation issue.
+            "trion_t120bga576dev_kit",  # Reason: Require Efinity toolchain.
+            "titanium_ti60f225dev_kit", # Reason: Require Efinity toolchain.
         ]
         for board in supported_boards:
             if board in excluded_boards:
